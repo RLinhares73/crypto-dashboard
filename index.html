@@ -2,392 +2,439 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Bitcoin Logarithmic Regression Channel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BTC Log Growth Channel</title>
 <style>
-  :root {
-    --bg: #0b0e14;
-    --panel: #11151d;
-    --border: #232936;
-    --text: #e8ecf1;
-    --muted: #8b93a3;
-    --accent: #f7931a; /* bitcoin orange */
-    --resistance: #e05252;
-    --support: #3fb27f;
-    --band: rgba(247,147,26,0.08);
-    --grid: #1c2230;
-  }
-  * { box-sizing: border-box; }
-  html, body {
-    margin: 0; padding: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  }
-  .wrap {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 20px 16px calc(32px + env(safe-area-inset-bottom, 0px));
-    padding-top: calc(20px + env(safe-area-inset-top, 0px));
-  }
-  h1 { font-size: 1.4rem; margin: 0 0 4px; }
-  .subtitle { color: var(--muted); font-size: 0.85rem; margin: 0 0 18px; line-height: 1.5; }
-  .subtitle b { color: var(--text); }
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
-  .panel {
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
+:root{
+  --bg:#0A0B0D;
+  --panel:#14161B;
+  --panel-2:#191C22;
+  --grid:#22262E;
+  --text:#E8E6E1;
+  --muted:#868C97;
+  --muted-2:#565B64;
+  --amber:#F2A93B;
+  --amber-dim:#8A6524;
+  --teal:#43C6AC;
+  --teal-dim:#1F4A41;
+  --violet:#8B90A0;
+  --violet-dim:#3A3D48;
+  --rose:#E2574C;
+  --weighted:#63B3FF;
+  --weighted-dim:#28405C;
+  --curved:#FF9757;
+  --curved-dim:#5C3A22;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:'Inter',ui-sans-serif,system-ui,sans-serif;}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 24px 40px;}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace;}
+.eyebrow{
+  font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--amber); margin:0 0 8px;
+}
+h1{
+  font-family:'Space Grotesk',ui-sans-serif,sans-serif;
+  font-weight:600; font-size:28px; line-height:1.15; margin:0 0 6px; letter-spacing:-.01em;
+}
+.sub{color:var(--muted); font-size:14.5px; line-height:1.5; margin:0 0 22px; max-width:760px;}
+.sub b{color:var(--text); font-weight:600;}
 
-  .controls {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 14px;
-  }
-  .fit-btn {
-    background: #161b26;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 0.82rem;
-    cursor: pointer;
-    transition: all 0.15s ease;
-  }
-  .fit-btn:hover { border-color: #3a4457; color: var(--text); }
-  .fit-btn.active {
-    background: var(--accent);
-    border-color: var(--accent);
-    color: #1a1200;
-    font-weight: 600;
-  }
+.panel{
+  background:linear-gradient(180deg,var(--panel),var(--panel-2));
+  border:1px solid var(--grid);
+  border-radius:10px;
+  padding:20px 20px 8px;
+}
 
-  svg { width: 100%; height: auto; display: block; }
-  .gridline { stroke: var(--grid); stroke-width: 1; }
-  .axis-label { fill: var(--muted); font-size: 11px; }
-  .price-line { fill: none; stroke: #ffffff; stroke-width: 1.6; }
-  .resistance-line { fill: none; stroke: var(--resistance); stroke-width: 1.6; stroke-dasharray: 5 4; }
-  .support-line { fill: none; stroke: var(--support); stroke-width: 1.6; stroke-dasharray: 5 4; }
-  .band-fill { fill: var(--band); }
-  .now-dot { fill: #fff; stroke: #000; stroke-width: 1; }
+.chartHead{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:6px;}
+.readout{display:flex; gap:22px; flex-wrap:wrap;}
+.readout .item{min-width:120px;}
+.readout .label{font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--muted-2); text-transform:uppercase; letter-spacing:.08em;}
+.readout .val{font-family:'JetBrains Mono',monospace; font-size:17px; font-weight:500; margin-top:2px;}
+.val.classic{color:var(--violet);}
+.val.recal{color:var(--teal);}
+.val.weighted{color:var(--weighted);}
+.val.curved{color:var(--curved);}
+.val.spot{color:var(--amber);}
 
-  .legend {
-    display: flex; flex-wrap: wrap; gap: 16px;
-    margin-top: 10px; font-size: 0.78rem; color: var(--muted);
-  }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+svg{width:100%; height:auto; display:block; overflow:visible;}
+.gridline{stroke:var(--grid); stroke-width:1;}
+.axislabel{fill:var(--muted-2); font-family:'JetBrains Mono',monospace; font-size:11px;}
+.price{fill:none; stroke:var(--amber); stroke-width:1.8;}
+.pre2013{fill:none; stroke:var(--amber); stroke-width:1.6; stroke-dasharray:1 3; opacity:.85;}
+.bandLower{fill:none; stroke:var(--violet-dim); stroke-width:1.4; stroke-dasharray:3 4;}
+.bandClassic{fill:none; stroke:var(--violet); stroke-width:1.6; stroke-dasharray:5 4;}
+.bandRecal{fill:none; stroke:var(--teal); stroke-width:2;}
+.bandWeighted{fill:none; stroke:var(--weighted); stroke-width:2; stroke-dasharray:2 3;}
+.bandCurved{fill:none; stroke:var(--curved); stroke-width:2.2;}
+.medianRecal{fill:none; stroke:var(--teal-dim); stroke-width:1.2;}
+.topDot{fill:var(--rose); stroke:var(--bg); stroke-width:1.5;}
+.botDot{fill:var(--muted); stroke:var(--bg); stroke-width:1.5;}
+.topDot.approx{fill:var(--bg); stroke:var(--rose); stroke-dasharray:2 2;}
+.botDot.approx{fill:var(--bg); stroke:var(--muted); stroke-dasharray:2 2;}
+.markLabel{fill:var(--muted); font-family:'JetBrains Mono',monospace; font-size:10.5px;}
 
-  .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 12px;
-    margin-top: 14px;
-  }
-  .stat { background: #161b26; border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
-  .stat-label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
-  .stat-value { font-size: 1.15rem; font-weight: 600; margin-top: 2px; }
-  .stat-value.pos { color: var(--support); }
-  .stat-value.neg { color: var(--resistance); }
+.status{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted-2); margin-top:8px; line-height:1.5;}
+.status.err{color:var(--rose);}
 
-  .notes {
-    font-size: 0.76rem;
-    color: var(--muted);
-    line-height: 1.6;
-    border-top: 1px solid var(--border);
-    padding-top: 12px;
-    margin-top: 4px;
-  }
-  .notes b { color: #b7bfcc; }
+.controls{
+  display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+  padding:16px 4px 18px; margin-top:6px; border-top:1px solid var(--grid);
+}
+.blendRow{display:flex; align-items:center; gap:12px; flex:1; min-width:280px;}
+.blendLabel{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--muted); white-space:nowrap;}
+.blendLabel.on{color:var(--text);}
+input[type=range]{
+  -webkit-appearance:none; appearance:none; flex:1; height:4px; border-radius:2px;
+  background:linear-gradient(90deg,var(--violet),var(--teal));
+  outline:none; cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:16px; height:16px; border-radius:50%;
+  background:var(--text); border:3px solid var(--bg); box-shadow:0 0 0 1px var(--grid); cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{
+  width:16px; height:16px; border-radius:50%; background:var(--text); border:3px solid var(--bg); cursor:pointer;
+}
+.presetBtns{display:flex; gap:6px;}
+.pbtn{
+  font-family:'JetBrains Mono',monospace; font-size:11px; padding:6px 11px; border-radius:6px;
+  background:var(--panel-2); border:1px solid var(--grid); color:var(--muted); cursor:pointer; transition:.15s;
+}
+.pbtn:hover{color:var(--text); border-color:var(--muted-2);}
+.pbtn.active{color:var(--bg); background:var(--amber); border-color:var(--amber);}
 
-  .loading { color: var(--muted); padding: 40px; text-align: center; font-size: 0.9rem; }
+.toggleRow{display:flex; align-items:center; gap:16px; flex-wrap:wrap; padding-top:2px;}
+.toggle{display:flex; align-items:center; gap:7px; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--muted);}
+.toggle input{accent-color:var(--text); width:14px; height:14px; cursor:pointer;}
+.toggle.on{color:var(--text);}
 
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) {
-      --bg: #f5f6f8; --panel: #ffffff; --border: #e3e6eb; --text: #1a1f29;
-      --muted: #6b7384; --grid: #eef0f3; --band: rgba(247,147,26,0.10);
-    }
-    :root:not([data-theme="dark"]) .fit-btn { background: #f0f1f4; color: #6b7384; }
-    :root:not([data-theme="dark"]) .price-line { stroke: #1a1f29; }
-    :root:not([data-theme="dark"]) .stat { background: #f7f8fa; }
-  }
+.legend{display:flex; gap:18px; flex-wrap:wrap; padding:14px 4px 4px; font-size:12px; color:var(--muted);}
+.legend .lg{display:flex; align-items:center; gap:7px;}
+.legend .sw{width:16px; height:2px; display:inline-block; border-radius:1px;}
+.legend .dot{width:9px; height:9px; border-radius:50%; display:inline-block;}
+
+.foot{margin-top:18px; font-size:12.5px; color:var(--muted-2); line-height:1.6;}
+.foot code{background:var(--panel-2); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--muted);}
+.foot .flag{color:var(--rose);}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Bitcoin Logarithmic Regression Channel</h1>
-  <p class="subtitle" id="subtitle">Loading data…</p>
+  <p class="eyebrow" id="eyebrow">Log-log regression · loading data…</p>
+  <h1>BTC growth channel, refit for a slower cycle</h1>
+  <p class="sub">A single straight line in log-log space can't pass through all five cycle tops at once — the recalibrated fit still misses 2017 by −36% and 2025 by +58%, because it's minimizing error across all five points, not chasing the recent ones. Two ways to close that gap: <b style="color:var(--weighted)">weight</b> recent tops more heavily so the line hugs 2021/2025, or let the line <b style="color:var(--curved)">curve</b> instead of forcing a straight power law through an accelerating deceleration. Toggle them on below. <span id="liveNote"></span></p>
 
   <div class="panel">
-    <div class="controls" id="fitButtons"></div>
-    <div id="chartHost"><div class="loading">Loading BTC price history…</div></div>
-    <div class="legend">
-      <span><i class="swatch" style="background:#fff"></i>BTC price (actual)</span>
-      <span><i class="swatch" style="background:var(--resistance)"></i>Resistance (selected fit)</span>
-      <span><i class="swatch" style="background:var(--support)"></i>Support</span>
+    <div class="chartHead">
+      <div class="readout">
+        <div class="item"><div class="label" id="lblSpot">Spot (latest close)</div><div class="val spot" id="roSpot">…</div></div>
+        <div class="item"><div class="label">Classic ceiling, today</div><div class="val classic" id="roClassic">…</div></div>
+        <div class="item"><div class="label">Recalibrated ceiling, today</div><div class="val recal" id="roRecal">…</div></div>
+        <div class="item"><div class="label">Weighted ceiling, today</div><div class="val weighted" id="roWeighted">…</div></div>
+        <div class="item"><div class="label">Curved ceiling, today</div><div class="val curved" id="roCurved">…</div></div>
+      </div>
     </div>
-    <div class="stats" id="stats"></div>
+
+    <svg id="chart" viewBox="0 0 1180 560" xmlns="http://www.w3.org/2000/svg"></svg>
+    <div class="status" id="status">Loading BTC data…</div>
+
+    <div class="controls">
+      <div class="blendRow">
+        <span class="blendLabel" id="lblClassic">Classic (early tops)</span>
+        <input type="range" id="blend" min="0" max="100" value="0" aria-label="Blend between classic and recalibrated fit">
+        <span class="blendLabel" id="lblRecal">Recalibrated (incl. '21 &amp; '25)</span>
+      </div>
+      <div class="presetBtns">
+        <button class="pbtn active" data-v="0">Classic</button>
+        <button class="pbtn" data-v="100">Recalibrated</button>
+        <button class="pbtn" data-v="50">Blend</button>
+      </div>
+    </div>
+
+    <div class="controls toggleRow" style="border-top:none; margin-top:0; padding-top:0;">
+      <label class="toggle on" id="toggleWeightedLbl">
+        <input type="checkbox" id="toggleWeighted" checked>
+        Weighted fit (recency-weighted 2×/cycle)
+      </label>
+      <label class="toggle on" id="toggleCurvedLbl">
+        <input type="checkbox" id="toggleCurved" checked>
+        Curved fit (quadratic, all 5 tops)
+      </label>
+    </div>
+
+    <div class="legend">
+      <span class="lg"><span class="sw" style="background:var(--amber)"></span>BTC price (real CoinGecko daily closes)</span>
+      <span class="lg"><span class="sw" style="background:var(--amber); opacity:.5"></span>Pre-2013 (approximate, not fetched data)</span>
+      <span class="lg"><span class="sw" style="background:var(--violet); opacity:.8"></span>Upper band — classic fit</span>
+      <span class="lg"><span class="sw" style="background:var(--teal)"></span>Upper band — recalibrated fit</span>
+      <span class="lg"><span class="sw" style="background:var(--weighted)"></span>Upper band — weighted fit</span>
+      <span class="lg"><span class="sw" style="background:var(--curved)"></span>Upper band — curved (quadratic) fit</span>
+      <span class="lg"><span class="sw" style="background:var(--muted); opacity:.6"></span>Lower band (support, unchanged)</span>
+      <span class="lg"><span class="dot" style="background:var(--rose)"></span>Cycle top</span>
+      <span class="lg"><span class="dot" style="background:var(--muted)"></span>Cycle bottom</span>
+      <span class="lg"><span class="dot" style="border:1.5px dashed var(--muted)"></span>Hollow = approximated anchor (2011)</span>
+    </div>
   </div>
 
-  <div class="panel notes" id="notes"></div>
+  <p class="foot">
+    Method: <code>ln(price) = a·ln(days since genesis) + c</code>, least-squares fit to cycle extremes, same family as public log-regression / "rainbow" channel tools.
+    Classic fit uses the 2011, 2013 &amp; 2017 tops (a≈4.95); recalibrated adds the 2021 &amp; 2025 tops (a≈4.38), which is what bends the ceiling down.
+    Neither line passes through every top exactly — recalibrated misses 2017 by −36% and 2025 by +58%, since a straight log-log line can't fit 5 non-collinear points at once.
+    <b style="color:var(--weighted)">Weighted fit</b> uses the same 5 tops but with weights doubling each cycle (1, 2, 4, 8, 16 for 2011→2025), pulling the line toward recent history at the cost of the 2011 top (+130% miss) — 2025 is still off by +20%.
+    <b style="color:var(--curved)">Curved fit</b> drops the straight-line assumption entirely and fits a quadratic, <code>ln(price) = a·ln(days)² + b·ln(days) + c</code>, which bends to track the accelerating deceleration — tightest overall fit, within ±17% on every top.
+    Lower band is fit once to the 2011/2015/2018/2022 bottoms and held fixed across all versions; a sustained break of the lower band has not happened at this point in prior cycles.
+    <span class="flag">The 2013-04-28 → latest series is real daily-close data from CoinGecko, drawn at full daily resolution and extended automatically once a day. Exact cycle top/bottom dates (2013 onward) are real closes. The 2010–2013 stretch before CoinGecko's data start is a hand-reconstructed approximation (dotted line), and the 2011 top/bottom used in every fit above are approximate for the same reason (hollow markers). Fit constants were computed once and are NOT recalculated automatically; a new cycle top would require refitting them.</span>
+    Descriptive historical fit only; not a forecast or investment advice.
+  </p>
 </div>
 
 <script>
 (function () {
-  "use strict";
+"use strict";
 
-  // ---- Precomputed regression constants -------------------------------
-  // Methodology: log10(price) = a + b*log10(days since genesis block),
-  // fit in log-log space through real cycle-top closes (resistance) and
-  // real cycle-bottom closes (support). All top/bottom dates and prices
-  // below are taken directly from the committed price history EXCEPT the
-  // 2011 points, which predate CoinGecko's own BTC listing and therefore
-  // predate this dataset -- those two are widely-cited approximations,
-  // flagged as such in the footnote below, never presented as fetched data.
-  //
-  // The "b" (slope / power-law exponent) values below came out within
-  // ~1% of the figures recorded for this project before this rebuild
-  // (classic ~4.95, recalibrated ~4.38, weighted ~3.96), which cross-checks
-  // the anchor points and methodology used here.
-  var GENESIS = Date.UTC(2009, 0, 3) / 86400000; // days, as a UTC day index
+// 2010–2013 pre-dataset stretch: hand-anchored approximation (CoinGecko's data starts 2013-04-28). Drawn dotted.
+var PRE2013 = [
+  ["2010-07-17",0.05],["2010-11-06",0.30],["2011-02-09",1.00],["2011-06-08",31.00],
+  ["2011-11-19",2.05],["2012-08-15",10.00],["2012-12-31",13.50],["2013-04-10",266.00]
+];
+// [date, price, approximated?]  — 2011 anchors predate the dataset and are approximations; the rest are real closes.
+var tops = [["2011-06-08",31.00,true],["2013-11-29",1127.45,false],["2017-12-15",19665.39,false],["2021-11-08",67538.88,false],["2025-10-06",124739.81,false]];
+var bots = [["2011-11-19",2.05,true],["2015-01-13",172.15,false],["2018-12-15",3216.15,false],["2022-11-21",15794.33,false]];
 
-  var FITS = {
-    classic:      { label: "Classic",      desc: "2011 / 2013 / 2017 tops, unweighted",  a: -13.20229, b: 4.98455 },
-    recalibrated: { label: "Recalibrated", desc: "All 5 cycle tops, unweighted",          a: -11.36563, b: 4.40058 },
-    weighted:     { label: "Weighted",     desc: "All 5 tops, recency-doubled weights",   a: -9.86114,  b: 3.97127 },
-    curved:       { label: "Curved",       desc: "Quadratic fit through all 5 tops",      a: -33.57661, b: 17.71748, c: -1.97911 }
-  };
-  var FIT_ORDER = ["classic", "recalibrated", "weighted", "curved"];
-  var SUPPORT = { a: -16.87162, b: 5.70552 }; // through 2011*/2015/2018/2022 cycle bottoms
+var dayMs = 86400000;
+var GENESIS = Date.UTC(2009,0,3);
+function ln(x){ return Math.log(x); }
+function toMs(dstr){ return Date.parse(dstr+"T00:00:00Z"); }
+function daysSinceMs(ms){ return (ms-GENESIS)/dayMs; }
 
-  var TOP_ANCHORS = [
-    { date: "2011-06-08", price: 29.60,     approx: true },
-    { date: "2013-11-29", price: 1127.45,   approx: false },
-    { date: "2017-12-15", price: 19665.39,  approx: false },
-    { date: "2021-11-08", price: 67538.88,  approx: false },
-    { date: "2025-10-06", price: 124739.81, approx: false }
-  ];
-  var BOTTOM_ANCHORS = [
-    { date: "2011-11-18", price: 2.14,      approx: true },
-    { date: "2015-01-13", price: 172.15,    approx: false },
-    { date: "2018-12-15", price: 3216.15,   approx: false },
-    { date: "2022-11-21", price: 15794.33,  approx: false }
-  ];
+// ---------- fitted regression constants (computed once via least squares on ln(days) vs ln(price)) ----------
+var FIT = {
+  upperClassic: {a:4.9483, c:-30.1136},
+  upperRecal:   {a:4.3792, c:-25.9918},
+  // weighted linear fit: same 5 tops, weights double each cycle (1,2,4,8,16), pulls toward 2021/2025
+  upperWeighted:{a:3.9592, c:-22.6026},
+  // curved (quadratic) fit: ln(price) = a*x^2 + b*x + c where x = ln(days)
+  upperCurved:  {a:-0.83274, b:17.2812, c:-75.5411, quadratic:true},
+  lower:        {a:5.7361, c:-39.1001}
+};
+function fitAtMs(fit, ms){
+  var x = ln(Math.max(1, daysSinceMs(ms)));
+  return fit.quadratic ? Math.exp(fit.a*x*x + fit.b*x + fit.c) : Math.exp(fit.a*x + fit.c);
+}
+function blendFit(t){ // t 0..1
+  return { a: FIT.upperClassic.a + t*(FIT.upperRecal.a-FIT.upperClassic.a),
+           c: FIT.upperClassic.c + t*(FIT.upperRecal.c-FIT.upperClassic.c) };
+}
 
-  function daysSinceGenesis(dateStr) {
-    var t = Date.parse(dateStr + "T00:00:00Z") / 86400000;
-    return t - GENESIS;
-  }
-  function logDays(dateStr) { return Math.log10(daysSinceGenesis(dateStr)); }
+// ---------- chart geometry ----------
+var svg = document.getElementById('chart');
+var W=1180, H=560, ML=64, MR=24, MT=18, MB=44;
+var plotW = W-ML-MR, plotH = H-MT-MB;
+var xMin = Date.UTC(2010,5,1), xMax = Date.UTC(2032,0,1);
+var yMin = 0.03, yMax = 3000000; // log scale bounds
 
-  function predictLinear(fit, x) { return Math.pow(10, fit.a + fit.b * x); }
-  function predictFit(fit, x) {
-    if (fit.c !== undefined) return Math.pow(10, fit.a + fit.b * x + fit.c * x * x);
-    return predictLinear(fit, x);
-  }
+function xPix(ms){ return ML + (ms-xMin)/(xMax-xMin)*plotW; }
+function yPix(price){
+  var t = (ln(price)-ln(yMin))/(ln(yMax)-ln(yMin));
+  return MT + plotH - t*plotH;
+}
+function svgEl(tag, attrs){
+  var el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for(var k in attrs) el.setAttribute(k, attrs[k]);
+  return el;
+}
+function pathFromPoints(pts){
+  return pts.map(function(p,i){ return (i===0?'M':'L')+xPix(p[0]).toFixed(1)+','+yPix(Math.max(yMin,p[1])).toFixed(1); }).join(' ');
+}
+function fmt(v){
+  if(v>=1000000) return '$'+(v/1000000).toFixed(2)+'M';
+  if(v>=1000) return '$'+(v/1000).toFixed(0)+'K';
+  return '$'+v.toFixed(0);
+}
+function fmtSpot(v){
+  if(v>=1000) return '$'+(v/1000).toFixed(1)+'K';
+  return '$'+v.toFixed(2);
+}
+function fmtDate(ms){ return new Date(ms).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric',timeZone:'UTC'}); }
 
-  var fmtUSD = function (v) {
-    if (v >= 1000) return "$" + Math.round(v).toLocaleString("en-US");
-    return "$" + v.toFixed(2);
-  };
-  var fmtUSDShort = function (v) {
-    if (v >= 1e6) return "$" + (v / 1e6).toFixed(v >= 1e7 ? 0 : 1) + "M";
-    if (v >= 1e3) return "$" + (v / 1e3).toFixed(v >= 1e4 ? 0 : 1) + "k";
-    return "$" + Math.round(v);
-  };
-  var fmtDate = function (dateStr) {
-    var d = new Date(dateStr + "T00:00:00Z");
-    return d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
-  };
+var prices = null;      // [[ms, price], ...] real daily closes
+var dynEls = [];        // currently drawn dynamic lines (cleared as a list, so toggles can never double-remove)
 
-  // ---- Load data --------------------------------------------------------
-  fetch("data/btc-history.json")
-    .then(function (r) {
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      return r.json();
-    })
-    .then(init)
-    .catch(function (err) {
-      document.getElementById("chartHost").innerHTML =
-        '<div class="loading">Could not load data/btc-history.json (' + err.message + ').</div>';
-    });
-
-  var currentFit = "recalibrated";
-
-  function init(rawData) {
-    // rawData: [[dateStr, price], ...] sorted ascending
-    var data = rawData.filter(function (r) { return r[1] != null && r[1] > 0; });
-    var lastRow = data[data.length - 1];
-    var lastDate = lastRow[0];
-    var lastPrice = lastRow[1];
-
-    document.getElementById("subtitle").innerHTML =
-      "Data as of <b>" + fmtDate(lastDate) + "</b> &middot; " + data.length.toLocaleString() +
-      " daily closes &middot; Source: CoinGecko (2013\u2013present, real daily closes; auto-updated daily)";
-
-    buildFitButtons();
-    renderAll(data, lastDate, lastPrice);
-    renderNotes();
+function buildStatic(){
+  // grid + axes
+  [0.1,1,10,100,1000,10000,100000,1000000].forEach(function(v){
+    var y = yPix(v);
+    svg.appendChild(svgEl('line',{x1:ML,x2:W-MR,y1:y,y2:y,'class':'gridline'}));
+    var label = v>=1000000?'$'+(v/1000000)+'M':v>=1000?'$'+(v/1000)+'K':'$'+v;
+    var t = svgEl('text',{x:8,y:y+4,'class':'axislabel'});
+    t.textContent = label; svg.appendChild(t);
+  });
+  for(var yr=2011; yr<=2032; yr+=2){
+    var x = xPix(Date.UTC(yr,0,1));
+    svg.appendChild(svgEl('line',{x1:x,x2:x,y1:MT,y2:H-MB,'class':'gridline'}));
+    var t2 = svgEl('text',{x:x-14,y:H-MB+18,'class':'axislabel'});
+    t2.textContent = yr; svg.appendChild(t2);
   }
 
-  function buildFitButtons() {
-    var host = document.getElementById("fitButtons");
-    host.innerHTML = "";
-    FIT_ORDER.forEach(function (key) {
-      var btn = document.createElement("button");
-      btn.className = "fit-btn" + (key === currentFit ? " active" : "");
-      btn.textContent = FITS[key].label;
-      btn.title = FITS[key].desc;
-      btn.dataset.fit = key;
-      btn.addEventListener("click", function () {
-        currentFit = key;
-        Array.prototype.forEach.call(host.children, function (b) {
-          b.classList.toggle("active", b.dataset.fit === key);
-        });
-        rerenderChart();
-      });
-      host.appendChild(btn);
-    });
+  // "today" marker (real current date)
+  var xToday = xPix(Date.now());
+  svg.appendChild(svgEl('line',{x1:xToday,x2:xToday,y1:MT,y2:H-MB,stroke:'#333844','stroke-width':1,'stroke-dasharray':'2 3'}));
+  var tt = svgEl('text',{x:xToday+6,y:MT+14,'class':'axislabel'}); tt.textContent='today'; svg.appendChild(tt);
+
+  // pre-2013 approximate segment (dotted), joined to the first real point
+  var pre = PRE2013.map(function(a){ return [toMs(a[0]), a[1]]; }).concat([prices[0]]);
+  svg.appendChild(svgEl('path',{d:pathFromPoints(pre),'class':'pre2013'}));
+
+  // real price line
+  svg.appendChild(svgEl('path',{d:pathFromPoints(prices),'class':'price'}));
+
+  // top/bottom markers (hollow = approximated anchor)
+  tops.forEach(function(t){
+    var x = xPix(toMs(t[0])), y = yPix(t[1]);
+    svg.appendChild(svgEl('circle',{cx:x,cy:y,r:4.5,'class':'topDot'+(t[2]?' approx':'')}));
+    var lab = svgEl('text',{x:x-16,y:y-10,'class':'markLabel'});
+    lab.textContent = t[0].slice(0,4)+' top';
+    svg.appendChild(lab);
+  });
+  bots.forEach(function(b){
+    var x = xPix(toMs(b[0])), y = yPix(b[1]);
+    svg.appendChild(svgEl('circle',{cx:x,cy:y,r:3.5,'class':'botDot'+(b[2]?' approx':'')}));
+  });
+
+  // lower band curve (fixed)
+  svg.appendChild(bandPath(FIT.lower, 'bandLower'));
+}
+
+function bandPath(fit, cls){
+  var d = '';
+  for(var i=0;i<=200;i++){
+    var ms = xMin + (xMax-xMin)*i/200;
+    var price = fitAtMs(fit, ms);
+    var x = xPix(ms), y = yPix(Math.max(yMin,Math.min(yMax,price)));
+    d += (i===0?'M':'L')+x.toFixed(1)+','+y.toFixed(1)+' ';
   }
+  return svgEl('path',{d:d,'class':cls});
+}
 
-  var STATE = {};
+function addDyn(el){ svg.appendChild(el); dynEls.push(el); return el; }
 
-  function renderAll(data, lastDate, lastPrice) {
-    STATE.data = data;
-    STATE.lastDate = lastDate;
-    STATE.lastPrice = lastPrice;
-    rerenderChart();
+function drawDynamic(t){
+  while(dynEls.length){ svg.removeChild(dynEls.pop()); }
+
+  // classic + recal upper always shown, blend position sets which is emphasised
+  var classicEl = addDyn(bandPath(FIT.upperClassic, 'bandClassic'));
+  var recalEl   = addDyn(bandPath(FIT.upperRecal, 'bandRecal'));
+  var bf = blendFit(t);
+  var medFit = { a:(bf.a+FIT.lower.a)/2, c:(bf.c+FIT.lower.c)/2 };
+  addDyn(bandPath(medFit, 'medianRecal'));
+  classicEl.setAttribute('opacity', 0.25+0.75*(1-t));
+  recalEl.setAttribute('opacity', 0.25+0.75*t);
+
+  // weighted + curved fits, independently toggleable
+  if(document.getElementById('toggleWeighted').checked) addDyn(bandPath(FIT.upperWeighted, 'bandWeighted'));
+  if(document.getElementById('toggleCurved').checked)   addDyn(bandPath(FIT.upperCurved, 'bandCurved'));
+
+  // readouts: ceilings evaluated at the real current date
+  var now = Date.now();
+  document.getElementById('roClassic').textContent  = fmt(fitAtMs(FIT.upperClassic, now));
+  document.getElementById('roRecal').textContent    = fmt(fitAtMs(FIT.upperRecal, now));
+  document.getElementById('roWeighted').textContent = fmt(fitAtMs(FIT.upperWeighted, now));
+  document.getElementById('roCurved').textContent   = fmt(fitAtMs(FIT.upperCurved, now));
+}
+
+// ---------- data-driven text (replaces the old hard-coded "as of Aug 3" statements) ----------
+function liveSummary(){
+  var last = prices[prices.length-1];
+  var p = last[1], ms = last[0];
+  var sup = fitAtMs(FIT.lower, ms);
+  var rel = (p/sup - 1)*100;
+  var ceilings = [["classic",FIT.upperClassic],["recalibrated",FIT.upperRecal],["weighted",FIT.upperWeighted],["curved",FIT.upperCurved]];
+  var above = ceilings.filter(function(c){ return p > fitAtMs(c[1], ms); }).map(function(c){ return c[0]; });
+
+  var html = 'BTC closed at <b class="mono" style="color:var(--amber)">' + fmtSpot(p) + '</b> on ' + fmtDate(ms) + ' (CoinGecko) \u2014 ' +
+    (above.length===0 ? 'below every ceiling here' : 'above the ' + above.join(', ') + ' ceiling') + ', and ' +
+    '<b>' + Math.abs(rel).toFixed(1) + '% ' + (rel>=0 ? 'above' : 'below') + '</b> the modeled <b>lower support band</b> (~' + fmt(sup) + ' at that date).';
+
+  if(rel < 0){
+    var i = prices.length-1;
+    while(i>0 && prices[i-1][1] < fitAtMs(FIT.lower, prices[i-1][0])) i--;
+    html += ' Closes have been under the band continuously since ' + fmtDate(prices[i][0]) + '.';
+  } else {
+    var j = prices.length-1;
+    while(j>=0 && prices[j][1] >= fitAtMs(FIT.lower, prices[j][0])) j--;
+    html += (j>=0) ? ' The most recent close below the band was ' + fmtDate(prices[j][0]) + '.'
+                   : ' No close in the real-data window has been below the band.';
   }
+  return html;
+}
 
-  function rerenderChart() {
-    var data = STATE.data, lastDate = STATE.lastDate, lastPrice = STATE.lastPrice;
-    var fit = FITS[currentFit];
+function init(raw){
+  prices = raw.filter(function(r){ return r[1]!=null && r[1]>0; }).map(function(r){ return [toMs(r[0]), r[1]]; });
+  var last = prices[prices.length-1];
 
-    // X domain: from first data point to ~1 year past last data point.
-    var firstDateStr = data[0][0];
-    var futureDate = new Date(Date.parse(lastDate + "T00:00:00Z") + 365 * 86400000)
-      .toISOString().slice(0, 10);
-    var xMinL = logDays(firstDateStr);
-    var xMaxL = logDays(futureDate);
+  buildStatic();
+  drawDynamic(0);
 
-    // Y domain: span of actual price data plus the selected fit's resistance
-    // and the support line, sampled across the x domain, with padding.
-    var ys = data.map(function (r) { return Math.log10(r[1]); });
-    var sampleXs = [];
-    for (var i = 0; i <= 40; i++) sampleXs.push(xMinL + (xMaxL - xMinL) * i / 40);
-    sampleXs.forEach(function (x) {
-      ys.push(Math.log10(predictFit(fit, x)));
-      ys.push(Math.log10(predictLinear(SUPPORT, x)));
-    });
-    var yMinL = Math.min.apply(null, ys) - 0.12;
-    var yMaxL = Math.max.apply(null, ys) + 0.12;
+  document.getElementById('lblSpot').textContent = 'Spot (latest close, ' + fmtDate(last[0]) + ')';
+  document.getElementById('roSpot').textContent = fmtSpot(last[1]);
+  document.getElementById('eyebrow').textContent = 'Log-log regression \u00b7 2013\u2013present series is real CoinGecko daily data, through ' + fmtDate(last[0]);
+  document.getElementById('liveNote').innerHTML = liveSummary();
 
-    var W = 1000, H = 520;
-    var M = { top: 16, right: 16, bottom: 34, left: 64 };
-    var plotW = W - M.left - M.right;
-    var plotH = H - M.top - M.bottom;
-
-    function xPix(logD) { return M.left + (logD - xMinL) / (xMaxL - xMinL) * plotW; }
-    function yPix(logP) { return M.top + (1 - (logP - yMinL) / (yMaxL - yMinL)) * plotH; }
-
-    // --- price path ---
-    var pricePath = data.map(function (r, i) {
-      var x = xPix(logDays(r[0]));
-      var y = yPix(Math.log10(r[1]));
-      return (i === 0 ? "M" : "L") + x.toFixed(2) + "," + y.toFixed(2);
-    }).join(" ");
-
-    // --- resistance & support paths (sampled across full x domain) ---
-    var resPts = sampleXs.map(function (x) { return [xPix(x), yPix(Math.log10(predictFit(fit, x)))]; });
-    var supPts = sampleXs.map(function (x) { return [xPix(x), yPix(Math.log10(predictLinear(SUPPORT, x)))]; });
-    var resPath = resPts.map(function (p, i) { return (i === 0 ? "M" : "L") + p[0].toFixed(2) + "," + p[1].toFixed(2); }).join(" ");
-    var supPath = supPts.map(function (p, i) { return (i === 0 ? "M" : "L") + p[0].toFixed(2) + "," + p[1].toFixed(2); }).join(" ");
-    var bandPath = resPath + " L" + supPts[supPts.length - 1][0].toFixed(2) + "," + supPts[supPts.length - 1][1].toFixed(2) +
-      " " + supPts.slice().reverse().map(function (p) { return "L" + p[0].toFixed(2) + "," + p[1].toFixed(2); }).join(" ") + " Z";
-
-    // --- y gridlines: 1/3 decades within range ---
-    var gridVals = [];
-    for (var exp = -2; exp <= 7; exp++) {
-      [1, 3].forEach(function (m) {
-        var v = m * Math.pow(10, exp);
-        var lv = Math.log10(v);
-        if (lv >= yMinL && lv <= yMaxL) gridVals.push(v);
-      });
-    }
-
-    // --- x gridlines: Jan 1 of each year in range ---
-    var firstYear = new Date(firstDateStr + "T00:00:00Z").getUTCFullYear();
-    var lastYear = new Date(futureDate + "T00:00:00Z").getUTCFullYear();
-    var yearTicks = [];
-    for (var yr = firstYear; yr <= lastYear; yr++) {
-      var ds = yr + "-01-01";
-      var lx = logDays(ds);
-      if (lx >= xMinL && lx <= xMaxL) yearTicks.push({ year: yr, x: xPix(lx) });
-    }
-
-    var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
-
-    gridVals.forEach(function (v) {
-      var y = yPix(Math.log10(v));
-      svg += '<line class="gridline" x1="' + M.left + '" x2="' + (W - M.right) + '" y1="' + y.toFixed(1) + '" y2="' + y.toFixed(1) + '"/>';
-      svg += '<text class="axis-label" x="' + (M.left - 8) + '" y="' + (y + 3).toFixed(1) + '" text-anchor="end">' + fmtUSDShort(v) + '</text>';
-    });
-    yearTicks.forEach(function (t) {
-      svg += '<line class="gridline" x1="' + t.x.toFixed(1) + '" x2="' + t.x.toFixed(1) + '" y1="' + M.top + '" y2="' + (H - M.bottom) + '"/>';
-      svg += '<text class="axis-label" x="' + t.x.toFixed(1) + '" y="' + (H - M.bottom + 16) + '" text-anchor="middle">' + t.year + '</text>';
-    });
-
-    svg += '<path class="band-fill" d="' + bandPath + '"/>';
-    svg += '<path class="resistance-line" d="' + resPath + '"/>';
-    svg += '<path class="support-line" d="' + supPath + '"/>';
-    svg += '<path class="price-line" d="' + pricePath + '"/>';
-
-    var nowX = xPix(logDays(lastDate));
-    var nowY = yPix(Math.log10(lastPrice));
-    svg += '<circle class="now-dot" cx="' + nowX.toFixed(2) + '" cy="' + nowY.toFixed(2) + '" r="4"/>';
-
-    svg += '</svg>';
-    document.getElementById("chartHost").innerHTML = svg;
-
-    renderStats(fit, lastDate, lastPrice);
+  var statusEl = document.getElementById('status');
+  var ageDays = Math.floor((Date.now()-last[0])/dayMs);
+  var msg = 'Data as of ' + fmtDate(last[0]) + ' \u2014 ' + prices.length.toLocaleString() + ' real daily closes from ' + fmtDate(prices[0][0]) + '. Pre-2013 segment is approximate.';
+  if(ageDays > 3){
+    msg += ' WARNING: latest data point is ' + ageDays + ' days old; the daily update job may not have run, so the price shown is not current.';
+    statusEl.classList.add('err');
   }
+  statusEl.textContent = msg;
+}
 
-  function renderStats(fit, lastDate, lastPrice) {
-    var x = logDays(lastDate);
-    var resToday = predictFit(fit, x);
-    var supToday = predictLinear(SUPPORT, x);
-    var pctOfBand = (Math.log10(lastPrice) - Math.log10(supToday)) / (Math.log10(resToday) - Math.log10(supToday)) * 100;
-    var fromSupport = (lastPrice / supToday - 1) * 100;
-    var fromResistance = (lastPrice / resToday - 1) * 100;
+// ---------- controls ----------
+var slider = document.getElementById('blend');
+var btns = document.querySelectorAll('.pbtn');
+function currentT(){ return (+slider.value)/100; }
 
-    var html = "";
-    html += stat("BTC price", fmtUSD(lastPrice));
-    html += stat("Resistance (" + FITS[currentFit].label + ")", fmtUSD(resToday));
-    html += stat("Support", fmtUSD(supToday));
-    html += stat("Position in channel", (isFinite(pctOfBand) ? pctOfBand.toFixed(0) : "\u2014") + "%");
-    html += stat("Vs. support", (fromSupport >= 0 ? "+" : "") + fromSupport.toFixed(1) + "%", fromSupport >= 0 ? "pos" : "neg");
-    html += stat("Vs. resistance", (fromResistance >= 0 ? "+" : "") + fromResistance.toFixed(1) + "%", fromResistance >= 0 ? "pos" : "neg");
-    document.getElementById("stats").innerHTML = html;
-  }
-  function stat(label, value, cls) {
-    return '<div class="stat"><div class="stat-label">' + label + '</div>' +
-      '<div class="stat-value' + (cls ? " " + cls : "") + '">' + value + '</div></div>';
-  }
+slider.addEventListener('input', function(e){
+  if(!prices) return;
+  var t = (+e.target.value)/100;
+  drawDynamic(t);
+  document.getElementById('lblClassic').classList.toggle('on', t<0.5);
+  document.getElementById('lblRecal').classList.toggle('on', t>=0.5);
+  btns.forEach(function(b){ b.classList.toggle('active', +b.dataset.v === +e.target.value); });
+});
+btns.forEach(function(b){
+  b.addEventListener('click', function(){
+    slider.value = b.dataset.v;
+    slider.dispatchEvent(new Event('input'));
+  });
+});
+document.getElementById('lblClassic').classList.add('on');
 
-  function renderNotes() {
-    document.getElementById("notes").innerHTML =
-      '<b>Methodology.</b> Each line fits log10(price) against log10(days since the Bitcoin genesis block, Jan 3 2009) through real cycle-top closes (resistance) or cycle-bottom closes (support). ' +
-      '<b>Classic</b> uses the 2011/2013/2017 tops; <b>Recalibrated</b> uses all five tops unweighted; <b>Weighted</b> uses all five tops with recency-doubled weights; <b>Curved</b> fits a quadratic through all five tops in log-log space. ' +
-      'The support line is a single unweighted fit through four cycle bottoms (2011, 2015, 2018, 2022) and does not change with the selected fit.<br><br>' +
-      '<b>Data.</b> All top/bottom anchor prices and dates are taken directly from the committed daily-close history (CoinGecko), ' +
-      'except the <b>2011-06-08 top (~$29.60)</b> and <b>2011-11-18 bottom (~$2.14)</b>, which predate CoinGecko\u2019s own BTC listing and this dataset \u2014 ' +
-      'those two are widely-cited approximations, not fetched data. The daily price series itself is 100% real CoinGecko data from 2013-04-28 onward, refreshed automatically once a day.<br><br>' +
-      '<b>Caveat.</b> This is a descriptive historical-fit model, not a forecast or investment advice. Past cycle geometry provides no guarantee about future price behavior, and the projected channel edges shown beyond the current date are extrapolations of the fitted curve, not predictions.';
-  }
+document.getElementById('toggleWeighted').addEventListener('change', function(e){
+  document.getElementById('toggleWeightedLbl').classList.toggle('on', e.target.checked);
+  if(prices) drawDynamic(currentT());
+});
+document.getElementById('toggleCurved').addEventListener('change', function(e){
+  document.getElementById('toggleCurvedLbl').classList.toggle('on', e.target.checked);
+  if(prices) drawDynamic(currentT());
+});
+
+// ---------- load data ----------
+fetch("data/btc-history.json")
+  .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+  .then(init)
+  .catch(function(err){
+    var s = document.getElementById('status');
+    s.textContent = 'Could not load data/btc-history.json (' + err.message + ').';
+    s.classList.add('err');
+    document.getElementById('eyebrow').textContent = 'Log-log regression \u00b7 data load failed';
+  });
 })();
 </script>
 </body>
