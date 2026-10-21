@@ -94,8 +94,174 @@ svg{width:100%; height:auto; display:block; overflow:visible;}
 .foot code{background:var(--panel-2); padding:1px 5px; border-radius:4px; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:var(--muted);}
 .foot .flag{color:var(--rose);}
 </style>
+<style>
+  /* ===== Abas do site + aba "Como investir" (estilos novos; o Dashboard não usa nada daqui) ===== */
+  :root {
+    --chip: #191C22;
+    --border: var(--grid);
+    --accent: var(--amber);
+    --support: var(--teal);
+    --resistance: var(--rose);
+    --blue: var(--teal);
+    --c-rf: #43C6AC; --c-br: #F2A93B; --c-int: #7AA2F7; --c-fii: #A98BE0; --c-btc: #E2574C;
+    --warn-bg: rgba(242,169,59,0.10);
+    --hl-bg: rgba(242,169,59,0.12);
+    --band: rgba(242,169,59,0.08);
+  }
+  [hidden] { display: none !important; }
+
+  .site-nav {
+    position: sticky; top: 0; z-index: 50;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  .site-nav-inner { max-width: 1100px; margin: 0 auto; padding: 10px 16px; display: flex; gap: 8px; }
+  .tab {
+    background: var(--chip); border: 1px solid var(--border); color: var(--muted);
+    padding: 9px 16px; border-radius: 8px; font-size: 0.9rem; text-decoration: none;
+    transition: all 0.15s ease; -webkit-tap-highlight-color: transparent;
+  }
+  .tab:hover { border-color: #3a4457; color: var(--text); }
+  .tab[aria-selected="true"] { background: var(--accent); border-color: var(--accent); color: #1a1200; font-weight: 600; }
+  .tab:focus-visible, .ci-details summary:focus-visible, .ci-input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .ci-slice:focus, .ci-slice:focus-visible { outline: none; }
+
+  .ci h1 { font-size: 1.4rem; margin: 0 0 4px; }
+  .ci h2 { font-size: 1.1rem; margin: 0 0 10px; }
+  .ci h3 { font-size: 0.95rem; margin: 18px 0 8px; }
+  .ci p { line-height: 1.6; margin: 0 0 12px; font-size: 0.92rem; }
+  .ci .panel > :last-child { margin-bottom: 0; }
+  .ci .small { font-size: 0.8rem; color: var(--muted); }
+  .ci em.small { display: block; }
+
+  .ci-alert {
+    display: flex; gap: 12px; align-items: flex-start;
+    background: var(--warn-bg); border: 1px solid var(--accent); border-left-width: 5px;
+    border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;
+  }
+  .ci-alert svg { width: 22px; height: 22px; flex: none; margin-top: 1px; }
+  .ci-alert p { margin: 0; font-size: 0.9rem; }
+  .ci-alert p + p { margin-top: 4px; color: var(--muted); font-size: 0.84rem; }
+
+  .ci-cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 10px; }
+  .ci-cards li { background: var(--chip); border: 1px solid var(--border); border-radius: 10px; padding: 11px 13px; font-size: 0.88rem; line-height: 1.5; }
+  .ci-cards li b { color: var(--text); }
+  .ci-check { list-style: none; margin: 0; padding: 0; }
+  .ci-check li { position: relative; padding: 7px 0 7px 28px; font-size: 0.92rem; line-height: 1.5; border-bottom: 1px solid var(--border); }
+  .ci-check li:last-child { border-bottom: 0; }
+  .ci-check li::before { content: "\2713"; position: absolute; left: 4px; top: 7px; color: var(--support); font-weight: 700; }
+  .ci-bullets { margin: 0 0 4px; padding-left: 20px; }
+  .ci-bullets li { font-size: 0.88rem; line-height: 1.6; margin-bottom: 6px; color: var(--text); }
+
+  .ci-callout { background: var(--chip); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin-top: 12px; font-size: 0.9rem; line-height: 1.6; }
+
+  .ci-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  .ci-table th { text-align: left; color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+  .ci-table td { padding: 10px; border-bottom: 1px solid var(--border); line-height: 1.45; vertical-align: top; }
+  .ci-table tr:last-child td { border-bottom: 0; }
+  .ci-table .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .ci-table th.num { text-align: right; }
+  .ci-table tr.hl td { background: var(--hl-bg); }
+  .ci-table tr.hl td:first-child { box-shadow: inset 4px 0 0 var(--accent); }
+  .ci-table tr[data-i] { cursor: pointer; transition: background 0.12s ease; }
+  .ci-table tr[data-i].on td { background: var(--chip); }
+  .ci-badge { display: inline-block; background: var(--accent); color: #1a1200; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; margin-top: 4px; white-space: nowrap; }
+  .ci-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 8px; vertical-align: -1px; }
+  .ci-tablewrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  @media (max-width: 640px) {
+    .ci-table.stack thead { position: absolute; left: -9999px; }
+    .ci-table.stack, .ci-table.stack tbody, .ci-table.stack tr, .ci-table.stack td { display: block; width: 100%; }
+    .ci-table.stack tr { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+    .ci-table.stack tr:last-child { margin-bottom: 0; }
+    .ci-table.stack td { border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; gap: 14px; text-align: right; padding: 9px 12px; }
+    .ci-table.stack td:last-child { border-bottom: 0; }
+    .ci-table.stack td::before { content: attr(data-label); color: var(--muted); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; text-align: left; flex: none; padding-top: 2px; }
+    .ci-table.stack .num { text-align: right; }
+    .ci-table.stack tr.hl td:first-child { box-shadow: none; }
+    .ci-table.stack tr.hl { border-color: var(--accent); border-left-width: 4px; }
+  }
+
+  .ci-split { display: grid; grid-template-columns: 1fr; gap: 18px; align-items: center; }
+  @media (min-width: 820px) { .ci-split { grid-template-columns: 300px 1fr; } }
+  .ci-donut { max-width: 290px; width: 100%; margin: 0 auto; }
+  .ci-slice { cursor: pointer; stroke: var(--panel); stroke-width: 2; transition: transform 0.15s ease, opacity 0.15s ease; transform-origin: 120px 120px; }
+  .ci-slice.on { transform: scale(1.045); }
+  .ci-donut.has-on .ci-slice:not(.on) { opacity: 0.45; }
+  .ci-dc1 { fill: var(--muted); font-size: 12px; }
+  .ci-dc2 { fill: var(--text); font-size: 21px; font-weight: 700; }
+  .ci-dc3 { fill: var(--muted); font-size: 12px; }
+
+  .ci-chart { position: relative; }
+  .ci-chart svg { touch-action: pan-y; }
+  .ci-hit { fill: transparent; }
+  .ci-tip {
+    position: absolute; top: 6px; left: 0; display: none; pointer-events: none; z-index: 5;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 10px; font-size: 0.8rem; line-height: 1.5; white-space: nowrap;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.28);
+  }
+  .ci-tip-t { font-weight: 600; margin-bottom: 2px; }
+  .ci-tip-r { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  .ci-tip-r span:first-child { color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
+  .ci-tip-r b { font-variant-numeric: tabular-nums; }
+  .ci-end { font-size: 12px; font-weight: 700; paint-order: stroke; stroke: var(--panel); stroke-width: 3px; stroke-linejoin: round; }
+  .ci .ci-hint { color: var(--muted); font-size: 0.76rem; margin: 6px 0 0; }
+  .swatch.dash { background: repeating-linear-gradient(90deg, var(--blue) 0 4px, transparent 4px 7px) !important; }
+
+  .ci-charts2 { display: grid; grid-template-columns: 1fr; gap: 18px; margin-bottom: 14px; }
+  @media (min-width: 900px) { .ci-charts2 { grid-template-columns: 1fr 1fr; } }
+  .ci-charts2 > div { min-width: 0; }
+  .ci-charts2 h3 { margin-top: 0; text-align: center; }
+
+  .ci-details { border: 1px solid var(--border); border-radius: 10px; background: var(--chip); margin-top: 10px; }
+  .ci-details summary { cursor: pointer; padding: 12px 14px; font-size: 0.9rem; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 10px; -webkit-tap-highlight-color: transparent; }
+  .ci-details summary::-webkit-details-marker { display: none; }
+  .ci-details summary::after { content: ""; width: 8px; height: 8px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); transition: transform 0.15s ease; flex: none; margin-right: 4px; }
+  .ci-details[open] summary::after { transform: rotate(-135deg); }
+  .ci-details-body { padding: 0 14px 14px; }
+  .ci-details .ci-table td, .ci-details .ci-table th { padding-left: 4px; padding-right: 4px; }
+
+  .ci-form { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 14px; }
+  @media (min-width: 760px) { .ci-form { grid-template-columns: repeat(4, 1fr); } }
+  .ci-field label { display: block; color: var(--muted); font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 5px; }
+  .ci-input { width: 100%; background: var(--chip); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 16px; font-family: inherit; }
+  .ci .ci-msg { color: var(--resistance); font-size: 0.82rem; min-height: 1.2em; margin: 0 0 8px; }
+
+  /* ===== Ajustes para combinar com o visual do Dashboard (Space Grotesk / Inter / JetBrains Mono) ===== */
+  .site-nav-inner { max-width: 1180px; padding: 10px 24px; }
+  @media (max-width: 600px) { .site-nav-inner { padding: 10px 16px; } }
+  .tab { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.04em; }
+  .tab[aria-selected="true"] { color: #0A0B0D; }
+  .ci h1, .ci h2, .ci h3 { font-family: 'Space Grotesk', ui-sans-serif, sans-serif; font-weight: 600; letter-spacing: -0.01em; }
+  .ci h1 { font-size: 28px; line-height: 1.15; margin: 0 0 6px; }
+  .ci h2 { font-size: 1.2rem; }
+  .ci .panel { padding: 20px; margin-bottom: 16px; }
+  .ci .sub { margin: 0 0 22px; font-size: 14.5px; }
+  .ci-badge, .ci-details summary { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .ci-badge { color: #0A0B0D; }
+  .ci-table th, .ci-table .num, .ci-tip b, .ci-end, .ci-dc1, .ci-dc2, .ci-dc3 { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .ci-table th { color: var(--muted-2); font-size: 10.5px; letter-spacing: 0.08em; }
+  .ci-ax { fill: var(--muted-2); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  .ci-input { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .ci-field label { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0.08em; color: var(--muted-2); }
+  .ci-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 12px 0 2px; font-size: 12px; color: var(--muted); }
+  .ci-legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .ci-sw { width: 16px; height: 2px; border-radius: 1px; display: inline-block; flex: none; }
+  .ci-sw.dash { background: repeating-linear-gradient(90deg, var(--teal) 0 4px, transparent 4px 7px) !important; height: 2px; }
+  .ci-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .ci-stat { background: var(--chip); border: 1px solid var(--grid); border-radius: 8px; padding: 10px 12px; }
+  .ci-stat-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted-2); text-transform: uppercase; letter-spacing: 0.08em; }
+  .ci-stat-value { font-family: 'JetBrains Mono', monospace; font-size: 17px; font-weight: 500; margin-top: 2px; }
+  .ci-stat-value.pos { color: var(--teal); }
+  .ci-hint, .ci .small { color: var(--muted-2); }
+  .ci-tip { background: var(--chip); }
+</style>
 </head>
 <body>
+<nav class="site-nav" aria-label="Seções do site"><div class="site-nav-inner" role="tablist"><a class="tab" role="tab" data-tab="dashboard" href="#dashboard">Dashboard</a><a class="tab" role="tab" data-tab="como-investir" href="#como-investir">Como investir</a></div></nav>
+<section id="panel-dashboard" role="tabpanel">
 <div class="wrap">
   <p class="eyebrow" id="eyebrow">Log-log regression · loading data…</p>
   <h1>BTC growth channel, refit for a slower cycle</h1>
@@ -152,6 +318,204 @@ svg{width:100%; height:auto; display:block; overflow:visible;}
     Descriptive historical fit only; not a forecast or investment advice.
   </p>
 </div>
+</section>
+<section id="panel-como-investir" role="tabpanel" hidden>
+<div class="wrap ci" lang="pt-BR">
+  <h1>Como investir aos 30 anos</h1>
+  <p class="sub">Guia prático para quem vive no Brasil.</p>
+
+  <div class="ci-alert" role="note">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#F2A93B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div>
+      <p><b>Conteúdo educativo, não é recomendação de investimento.</b></p>
+      <p>As simulações desta página usam premissas aproximadas e não garantem resultado algum.</p>
+    </div>
+  </div>
+
+  <!-- 1 -->
+  <div class="panel">
+    <h2>1. Boas práticas</h2>
+    <ul class="ci-bullets">
+      <li><b>Reserva de emergência primeiro:</b> 6 a 12 meses de despesas em algo seguro e com liquidez diária (Tesouro Selic, CDB de banco sólido ou fundo DI).</li>
+      <li><b>Prazo longo permite mais risco:</b> aos 30 anos, com décadas pela frente, dá para ter mais renda variável e atravessar as quedas.</li>
+      <li><b>Diversificar:</b> entre classes de ativos, países e moedas.</li>
+      <li><b>Usar as isenções:</b> LCI, LCA e dividendos de FIIs são isentos de IR para pessoa física.</li>
+      <li><b>Cuidar dos custos:</b> taxas pequenas viram muito dinheiro em décadas. Compare sempre.</li>
+      <li><b>Automatizar (DCA):</b> aportes regulares e automáticos (Dollar Cost Averaging) costumam bater a tentativa de acertar o momento do mercado.</li>
+      <li><b>Fugir de modismos:</b> invista com uma tese clara, não por hype.</li>
+    </ul>
+  </div>
+
+  <!-- 2 -->
+  <div class="panel">
+    <h2>2. Renda fixa ou variável?</h2>
+    <p>Regras de bolso: “100 menos a idade” em renda variável dá 70% aos 30 anos. Mais importante que a idade:</p>
+    <ul class="ci-bullets">
+      <li><b>Estabilidade da renda:</b> quem tem renda instável (negócio próprio, comissões) pode querer mais renda fixa.</li>
+      <li><b>Tolerância a quedas:</b> quedas de 30% em ações acontecem. A melhor alocação é a que você consegue manter sem vender no pânico.</li>
+      <li><b>Metas próximas:</b> dinheiro para usar em até 3 a 5 anos fica fora da renda variável.</li>
+    </ul>
+    <div class="ci-callout"><b>Referência</b> para quem não tem meta de curto prazo: 20-30% renda fixa, 50-60% ações (Brasil e exterior), 10-20% FIIs e outros. Revise a cada trimestre e rebalanceie de volta ao alvo.</div>
+  </div>
+
+  <!-- 3 -->
+  <div class="panel">
+    <h2>3. Investir fora do Brasil</h2>
+    <p>O real tende a perder valor frente ao dólar no longo prazo, e o Brasil é uma fração pequena do mercado global. Ficar 100% no Brasil concentra o risco em um país e uma moeda.</p>
+    <table class="ci-table stack">
+      <thead><tr><th>Caminho</th><th>Como funciona</th><th>Ponto de atenção</th></tr></thead>
+      <tbody>
+        <tr class="hl">
+          <td data-label="Caminho"><span><b>BDRs e ETFs na B3 (ex: IVVB11)</b><br><span class="ci-badge">A opção mais simples</span></span></td>
+          <td data-label="Como funciona">Compra em reais, na corretora de sempre, sem câmbio nem conta no exterior</td>
+          <td data-label="Ponto de atenção">Menos opções; alguns têm pouca liquidez</td>
+        </tr>
+        <tr>
+          <td data-label="Caminho">Corretora internacional (Avenue, IBKR)</td>
+          <td data-label="Como funciona">Compra direto em dólar</td>
+          <td data-label="Ponto de atenção">Câmbio, IOF e declaração de bens no exterior</td>
+        </tr>
+        <tr>
+          <td data-label="Caminho">Fundos com mandato internacional</td>
+          <td data-label="Como funciona">Um fundo brasileiro que investe lá fora</td>
+          <td data-label="Ponto de atenção">Taxas geralmente maiores</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:14px">Para quem está começando, BDRs e ETFs na B3 são o melhor ponto de partida. Quem for para uma corretora internacional pode converter para dólar aos poucos (DCA), sem depender da cotação de um único dia.</p>
+  </div>
+
+  <!-- 4 -->
+  <div class="panel">
+    <h2>4. Carteira modelo: R$ 100.000</h2>
+    <p>Perfil moderado-arrojado, sem meta de curto prazo. Vale para qualquer valor, na mesma proporção.</p>
+    <div class="ci-split">
+      <div>
+        <svg class="ci-donut" id="donut" viewBox="0 0 240 240" role="group" aria-label="Rosca da carteira modelo: renda fixa 25%, ações Brasil 30%, internacional 25%, FIIs 15%, cripto 5%"></svg>
+      </div>
+      <table class="ci-table stack" id="portTable">
+        <thead><tr><th>Classe</th><th class="num">%</th><th class="num">Valor</th><th>Exemplos</th></tr></thead>
+        <tbody>
+          <tr data-i="0"><td data-label="Classe"><span><span class="ci-dot" style="background:var(--c-rf)"></span>Renda fixa</span></td><td class="num" data-label="%">25%</td><td class="num" data-label="Valor">R$ 25.000</td><td data-label="Exemplos">Tesouro Selic (reserva), CDB/LCI</td></tr>
+          <tr data-i="1"><td data-label="Classe"><span><span class="ci-dot" style="background:var(--c-br)"></span>Ações Brasil</span></td><td class="num" data-label="%">30%</td><td class="num" data-label="Valor">R$ 30.000</td><td data-label="Exemplos">BOVA11 + 5 a 8 ações de setores diferentes</td></tr>
+          <tr data-i="2"><td data-label="Classe"><span><span class="ci-dot" style="background:var(--c-int)"></span>Internacional</span></td><td class="num" data-label="%">25%</td><td class="num" data-label="Valor">R$ 25.000</td><td data-label="Exemplos">IVVB11 + BDRs ou corretora no exterior</td></tr>
+          <tr data-i="3"><td data-label="Classe"><span><span class="ci-dot" style="background:var(--c-fii)"></span>FIIs</span></td><td class="num" data-label="%">15%</td><td class="num" data-label="Valor">R$ 15.000</td><td data-label="Exemplos">2 a 3 fundos de tijolo e papel</td></tr>
+          <tr data-i="4"><td data-label="Classe"><span><span class="ci-dot" style="background:var(--c-btc)"></span>Cripto</span></td><td class="num" data-label="%">5%</td><td class="num" data-label="Valor">R$ 5.000</td><td data-label="Exemplos">Bitcoin, posição pequena</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <ul class="ci-bullets" style="margin-top:14px">
+      <li>Cripto é o ativo mais volátil: no máximo 5 a 10% da carteira.</li>
+      <li>Quem já corre risco no próprio negócio pode subir a renda fixa para 30-35%.</li>
+      <li>A cada trimestre, se alguma classe crescer além do alvo, realize parte e rebalanceie.</li>
+    </ul>
+  </div>
+
+  <!-- 5 -->
+  <div class="panel">
+    <h2>5. A magia dos juros compostos</h2>
+    <p>Nos juros compostos o rendimento passa a render também. Veja R$ 100.000 a 10% ao ano:</p>
+    <div class="ci-chart" id="chartCompound"></div>
+    <div class="ci-legend">
+      <span><i class="ci-sw" style="background:var(--amber)"></i>Juros compostos (juros sobre juros)</span>
+      <span><i class="ci-sw dash"></i>Juros simples</span>
+    </div>
+    <p class="ci-hint">Passe o mouse (ou toque) no gráfico para ver o valor de cada ano.</p>
+    <table class="ci-table" style="margin-top:12px">
+      <thead><tr><th>Prazo</th><th class="num">Juros simples</th><th class="num">Juros compostos</th></tr></thead>
+      <tbody>
+        <tr><td>10 anos</td><td class="num">R$ 200.000</td><td class="num">R$ 259.374</td></tr>
+        <tr><td>20 anos</td><td class="num">R$ 300.000</td><td class="num">R$ 672.750</td></tr>
+        <tr><td>30 anos</td><td class="num">R$ 400.000</td><td class="num">R$ 1.744.940</td></tr>
+      </tbody>
+    </table>
+    <p style="margin-top:14px">Dos 20 aos 30 anos, o patrimônio cresce mais do que nos 20 anos anteriores. Começar cedo e não interromper vale mais que o valor do aporte.</p>
+    <em class="small">Taxa fixa só para ilustrar. Na prática os retornos variam e há inflação, impostos e taxas.</em>
+
+    <h3 style="margin-top:22px">Calculadora de juros compostos</h3>
+    <p class="small">Simule o seu caso. O gráfico se atualiza na hora.</p>
+    <div class="ci-form">
+      <div class="ci-field"><label for="c-ini">Valor inicial (R$)</label><input class="ci-input" id="c-ini" type="number" inputmode="decimal" min="0" step="1000" value="10000"></div>
+      <div class="ci-field"><label for="c-pmt">Aporte mensal (R$)</label><input class="ci-input" id="c-pmt" type="number" inputmode="decimal" min="0" step="100" value="1000"></div>
+      <div class="ci-field"><label for="c-rate">Taxa ao ano (%)</label><input class="ci-input" id="c-rate" type="number" inputmode="decimal" min="-50" max="100" step="0.5" value="10"></div>
+      <div class="ci-field"><label for="c-yrs">Prazo (anos)</label><input class="ci-input" id="c-yrs" type="number" inputmode="numeric" min="1" max="60" step="1" value="30"></div>
+    </div>
+    <p class="ci-msg" id="c-msg" aria-live="polite"></p>
+    <div class="ci-stats" id="c-stats"></div>
+    <div class="ci-chart" id="chartCalc"></div>
+    <div class="ci-legend">
+      <span><i class="ci-sw" style="background:var(--amber)"></i>Patrimônio acumulado</span>
+      <span><i class="ci-sw dash"></i>Total investido (valor inicial + aportes)</span>
+    </div>
+    <p class="ci-hint">Aportes feitos no fim de cada mês; a taxa anual é convertida na taxa mensal equivalente. Sem inflação, impostos ou taxas.</p>
+  </div>
+
+  <!-- 6 -->
+  <div class="panel">
+    <h2>6. Se essa carteira existisse há 10 e 20 anos</h2>
+    <p>Mesma carteira, sem Bitcoin (os 5% foram para renda fixa): 30% renda fixa, 30% ações Brasil, 25% internacional e 15% FIIs.</p>
+    <div class="ci-charts2">
+      <div><h3>R$ 100.000 investidos há 10 anos (2016→2026)</h3><div class="ci-chart" id="chartSim10"></div></div>
+      <div><h3>R$ 100.000 investidos há 20 anos (2006→2026)</h3><div class="ci-chart" id="chartSim20"></div></div>
+    </div>
+    <div class="ci-legend" style="padding-top:0">
+      <span><i class="ci-sw" style="background:var(--amber)"></i>Nominal</span>
+      <span><i class="ci-sw dash"></i>Real (descontada IPCA)</span>
+    </div>
+    <p class="ci-hint">Passe o mouse (ou toque) nos gráficos para ver o valor de cada ano.</p>
+    <table class="ci-table stack" style="margin-top:12px">
+      <thead><tr><th>Período</th><th class="num">Nominal</th><th class="num">Real (descontado IPCA)</th><th class="num">Ganho real ao ano</th></tr></thead>
+      <tbody>
+        <tr><td data-label="Período">2016 → 2026</td><td class="num" data-label="Nominal">R$ 329.595</td><td class="num" data-label="Real (descontado IPCA)">R$ 187.553</td><td class="num" data-label="Ganho real ao ano">6,5%</td></tr>
+        <tr><td data-label="Período">2006 → 2026</td><td class="num" data-label="Nominal">R$ 799.641</td><td class="num" data-label="Real (descontado IPCA)">R$ 249.332</td><td class="num" data-label="Ganho real ao ano">4,7%</td></tr>
+      </tbody>
+    </table>
+
+    <details class="ci-details">
+      <summary>Premissas (retorno médio ao ano)</summary>
+      <div class="ci-details-body">
+        <table class="ci-table">
+          <thead><tr><th>Classe</th><th class="num">10 anos</th><th class="num">20 anos</th></tr></thead>
+          <tbody>
+            <tr><td>Renda fixa (CDI)</td><td class="num">9,2%</td><td class="num">10,3%</td></tr>
+            <tr><td>Ações Brasil (Ibovespa)</td><td class="num">11,0%</td><td class="num">7,5%</td></tr>
+            <tr><td>Internacional (S&amp;P 500 + câmbio)</td><td class="num">18,8%</td><td class="num">14,5%</td></tr>
+            <tr><td>FIIs (IFIX; estimativa antes de 2012)</td><td class="num">7,9%</td><td class="num">9,0%</td></tr>
+            <tr><td>Inflação (IPCA)</td><td class="num">5,8%</td><td class="num">6,0%</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+    <details class="ci-details">
+      <summary>Notas e limitações da simulação</summary>
+      <div class="ci-details-body">
+        <ul class="ci-bullets">
+          <li>Bitcoin ficou de fora porque só existe desde 2009 e, sozinho, distorce o resultado de 10 anos.</li>
+          <li>Nos últimos 10 anos a alta do dólar turbinou a parte internacional. Isso não é garantido.</li>
+          <li>Cálculo simplificado: taxas médias arredondadas, sem oscilação ano a ano, rebalanceamento, impostos ou taxas. O caminho real teve quedas fortes (2008, 2015, 2020).</li>
+          <li>Rentabilidade passada não garante rentabilidade futura.</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+
+  <!-- 7 -->
+  <div class="panel">
+    <h2>7. Resumo</h2>
+    <ul class="ci-check">
+      <li>Reserva de emergência antes de tudo.</li>
+      <li>Diversifique em ativos, países e moedas.</li>
+      <li>Aporte todo mês, de forma automática (DCA).</li>
+      <li>Tempo é o ingrediente principal dos juros compostos.</li>
+      <li>Revise a cada trimestre e rebalanceie de volta ao alvo.</li>
+      <li>Ajuste a alocação se mudar sua renda, suas metas ou sua tolerância a risco.</li>
+    </ul>
+  </div>
+
+  <p class="small"><em>Conteúdo educativo, não constitui aconselhamento financeiro personalizado.</em></p>
+</div>
+</section>
+
 
 <script>
 (function () {
@@ -359,6 +723,311 @@ fetch("data/btc-history.json")
     s.classList.add('err');
     document.getElementById('eyebrow').textContent = 'Log-log regression \u00b7 data load failed';
   });
+})();
+</script>
+
+<script>
+(function () {
+  "use strict";
+
+  // ---------- Formatação pt-BR ----------
+  function int(n) { return String(Math.round(Math.abs(n))).replace(/\B(?=(\d{3})+(?!\d))/g, "."); }
+  function brl(n) { return (Math.round(n) < 0 ? "-" : "") + "R$ " + int(n); }
+  function pct(n, d) { return n.toFixed(d).replace(".", ",") + "%"; }
+  function dec(n) { return String(parseFloat(n.toFixed(2))).replace(".", ","); }
+  function brlShort(v) {
+    if (v >= 1e6) return "R$ " + dec(v / 1e6) + " mi";
+    if (v >= 1e3) return "R$ " + dec(v / 1e3) + " mil";
+    return "R$ " + dec(v);
+  }
+
+  // ---------- Roteamento por hash ----------
+  var TABS = {
+    "dashboard":    { panel: "panel-dashboard",    title: "BTC Log Growth Channel" },
+    "como-investir": { panel: "panel-como-investir", title: "Como investir aos 30 anos" }
+  };
+  function route() {
+    var key = location.hash.replace(/^#/, "");
+    if (!TABS[key]) {
+      key = "dashboard";
+      try { history.replaceState(null, "", "#dashboard"); } catch (e) { /* ignore */ }
+    }
+    Object.keys(TABS).forEach(function (k) {
+      var on = k === key;
+      document.getElementById(TABS[k].panel).hidden = !on;
+      var tab = document.querySelector('.tab[data-tab="' + k + '"]');
+      tab.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    document.title = TABS[key].title;
+    window.scrollTo(0, 0);
+    if (key === "como-investir") drawAll();
+  }
+  window.addEventListener("hashchange", route);
+
+  // ---------- Gráfico de linhas interativo ----------
+  function niceScale(max, ticks) {
+    if (!(max > 0)) return { max: 1, step: 0.25 };
+    var raw = max / ticks, mag = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / mag;
+    var step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * mag;
+    return { max: Math.ceil(max / step) * step, step: step };
+  }
+
+  function lineChart(host, o) {
+    var w = Math.floor(host.clientWidth);
+    if (w < 80) return;
+    host._lastW = w;
+    var n = o.series[0].values.length;
+    var h = Math.round(Math.max(250, Math.min(400, w * 0.58)));
+    var max = 0;
+    o.series.forEach(function (s) { s.values.forEach(function (v) { if (v > max) max = v; }); });
+    var sc = niceScale(max, 4);
+    var maxLen = 0;
+    for (var q = 0; q <= sc.max + sc.step / 2; q += sc.step) maxLen = Math.max(maxLen, brlShort(q).length);
+    var M = { top: 16, right: 14, bottom: 44, left: Math.ceil(maxLen * 6.4) + 16 };
+    var pw = w - M.left - M.right, ph = h - M.top - M.bottom;
+    function X(i) { return M.left + (n > 1 ? i / (n - 1) : 0) * pw; }
+    function Y(v) { return M.top + (1 - v / sc.max) * ph; }
+    function path(vals) { return vals.map(function (v, i) { return (i ? "L" : "M") + X(i).toFixed(1) + "," + Y(v).toFixed(1); }).join(" "); }
+
+    var s = '<svg viewBox="0 0 ' + w + " " + h + '" width="' + w + '" height="' + h + '" role="img" aria-label="' + o.aria + '">';
+    for (var v = 0; v <= sc.max + sc.step / 2; v += sc.step) {
+      var y = Y(v).toFixed(1);
+      s += '<line class="gridline" x1="' + M.left + '" x2="' + (w - M.right) + '" y1="' + y + '" y2="' + y + '"/>';
+      s += '<text class="ci-ax" x="' + (M.left - 8) + '" y="' + (+y + 4) + '" text-anchor="end">' + brlShort(v) + "</text>";
+    }
+    var maxLabels = Math.max(2, Math.floor(pw / 46)), xs = 1, steps = [1, 2, 5, 10, 20];
+    for (var k = 0; k < steps.length; k++) { xs = steps[k]; if ((n - 1) / xs <= maxLabels) break; }
+    for (var i = 0; i < n; i += xs) {
+      s += '<text class="ci-ax" x="' + X(i).toFixed(1) + '" y="' + (h - M.bottom + 16) + '" text-anchor="middle">' + i + "</text>";
+    }
+    s += '<text class="ci-ax" x="' + (M.left + pw / 2) + '" y="' + (h - 6) + '" text-anchor="middle">' + o.xTitle + "</text>";
+
+    if (o.fill) {
+      var top = o.series[o.fill[0]].values, bot = o.series[o.fill[1]].values;
+      var rev = bot.map(function (b, i) { return "L" + X(i).toFixed(1) + "," + Y(b).toFixed(1); }).reverse().join(" ");
+      s += '<path d="' + path(top) + " " + rev + ' Z" fill="rgba(242,169,59,0.08)"/>';
+    }
+    o.series.forEach(function (se) {
+      s += '<path d="' + path(se.values) + '" fill="none" stroke="' + se.color + '" stroke-width="2.4" stroke-linejoin="round"' + (se.dash ? ' stroke-dasharray="6 4"' : "") + "/>";
+    });
+    if (o.endLabels) {
+      o.series.forEach(function (se) {
+        var lv = se.values[n - 1];
+        s += '<circle cx="' + X(n - 1).toFixed(1) + '" cy="' + Y(lv).toFixed(1) + '" r="3.5" fill="' + se.color + '"/>';
+        s += '<text class="ci-end" x="' + (X(n - 1) - 8).toFixed(1) + '" y="' + (Y(lv) + 4).toFixed(1) + '" text-anchor="end" fill="' + se.color + '">' + brl(lv) + "</text>";
+      });
+    }
+    s += '<line id="vl" x1="0" x2="0" y1="' + M.top + '" y2="' + (h - M.bottom) + '" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" style="display:none"/>';
+    o.series.forEach(function (se, si) {
+      s += '<circle data-d="' + si + '" r="4.5" fill="' + se.color + '" stroke="var(--panel)" stroke-width="2" style="display:none"/>';
+    });
+    s += '<rect class="ci-hit" x="' + (M.left - 8) + '" y="' + M.top + '" width="' + (pw + 16) + '" height="' + ph + '"/></svg>';
+    host.innerHTML = s + '<div class="ci-tip"></div>';
+
+    var svg = host.querySelector("svg"), vl = host.querySelector("#vl"), tip = host.querySelector(".ci-tip");
+    var dots = host.querySelectorAll("circle[data-d]");
+    function show(ev) {
+      var r = svg.getBoundingClientRect();
+      var px = (ev.clientX - r.left) * (w / r.width);
+      var i = Math.round((px - M.left) / pw * (n - 1));
+      i = Math.max(0, Math.min(n - 1, i));
+      var x = X(i);
+      vl.setAttribute("x1", x); vl.setAttribute("x2", x); vl.style.display = "";
+      o.series.forEach(function (se, si) {
+        dots[si].setAttribute("cx", x); dots[si].setAttribute("cy", Y(se.values[i])); dots[si].style.display = "";
+      });
+      var html = '<div class="ci-tip-t">' + o.tipTitle(i) + "</div>";
+      o.rows(i).forEach(function (r2) {
+        var mark = r2.color ? '<i class="ci-sw" style="background:' + r2.color + '"></i>' : "";
+        html += '<div class="ci-tip-r"><span>' + mark + r2.name + "</span><b>" + r2.value + "</b></div>";
+      });
+      tip.innerHTML = html;
+      tip.style.display = "block";
+      var tw = tip.offsetWidth;
+      var left = x + 14 + tw > w ? x - 14 - tw : x + 14;
+      tip.style.left = Math.max(0, Math.min(w - tw, left)) + "px";
+    }
+    function hide() {
+      vl.style.display = "none"; tip.style.display = "none";
+      for (var d = 0; d < dots.length; d++) dots[d].style.display = "none";
+    }
+    svg.addEventListener("pointerdown", show);
+    svg.addEventListener("pointermove", show);
+    svg.addEventListener("pointerleave", function (ev) { if (ev.pointerType === "mouse") hide(); });
+  }
+
+  // ---------- Dados e gráficos ----------
+  var COMPOUND = (function () {
+    var simple = [], comp = [];
+    for (var t = 0; t <= 30; t++) { simple.push(100000 * (1 + 0.10 * t)); comp.push(100000 * Math.pow(1.10, t)); }
+    return { simple: simple, comp: comp };
+  })();
+
+  var W = { rf: 0.30, br: 0.30, int: 0.25, fii: 0.15 }; // carteira sem Bitcoin (seção 6)
+  var RATES = {
+    10: { rf: 0.092, br: 0.110, int: 0.188, fii: 0.079, ipca: 0.058 },
+    20: { rf: 0.103, br: 0.075, int: 0.145, fii: 0.090, ipca: 0.060 }
+  };
+  function sim(years) {
+    var r = RATES[years], nom = [], real = [];
+    for (var t = 0; t <= years; t++) {
+      var v = 100000 * (W.rf * Math.pow(1 + r.rf, t) + W.br * Math.pow(1 + r.br, t) +
+                        W.int * Math.pow(1 + r.int, t) + W.fii * Math.pow(1 + r.fii, t));
+      nom.push(v); real.push(v / Math.pow(1 + r.ipca, t));
+    }
+    return { nom: nom, real: real };
+  }
+
+  function drawCompound() {
+    var host = document.getElementById("chartCompound");
+    lineChart(host, {
+      series: [{ name: "Juros compostos", color: "var(--amber)", values: COMPOUND.comp },
+               { name: "Juros simples", color: "var(--blue)", dash: true, values: COMPOUND.simple }],
+      fill: [0, 1], endLabels: true, xTitle: "Anos",
+      aria: "Gráfico: R$ 100.000 a 10% ao ano por 30 anos, juros simples contra compostos",
+      tipTitle: function (i) { return i === 0 ? "Início" : "Ano " + i; },
+      rows: function (i) { return [
+        { name: "Juros compostos", color: "var(--amber)", value: brl(COMPOUND.comp[i]) },
+        { name: "Juros simples", color: "var(--blue)", value: brl(COMPOUND.simple[i]) }]; }
+    });
+  }
+
+  function drawSim(years, id, startYear) {
+    var d = sim(years), host = document.getElementById(id);
+    lineChart(host, {
+      series: [{ name: "Nominal", color: "var(--amber)", values: d.nom },
+               { name: "Real", color: "var(--blue)", dash: true, values: d.real }],
+      fill: [0, 1], endLabels: true, xTitle: "Anos desde o aporte",
+      aria: "Gráfico: R$ 100.000 investidos há " + years + " anos, valor nominal contra valor real descontado o IPCA",
+      tipTitle: function (i) { return (i === 0 ? "Início" : "Ano " + i) + " (" + (startYear + i) + ")"; },
+      rows: function (i) { return [
+        { name: "Nominal", color: "var(--amber)", value: brl(d.nom[i]) },
+        { name: "Real (descontada IPCA)", color: "var(--blue)", value: brl(d.real[i]) }]; }
+    });
+  }
+
+  // ---------- Calculadora ----------
+  function numVal(id) { var v = parseFloat(document.getElementById(id).value); return isFinite(v) ? v : 0; }
+  var calcState = null;
+  function calc() {
+    var ini = Math.max(0, numVal("c-ini")), pmt = Math.max(0, numVal("c-pmt"));
+    var rate = Math.max(-50, Math.min(100, numVal("c-rate")));
+    var yrs = Math.floor(numVal("c-yrs")), msg = "";
+    if (yrs < 1) { msg = "Informe um prazo de 1 a 60 anos."; }
+    if (yrs > 60) { yrs = 60; msg = "Prazo máximo: 60 anos."; }
+    document.getElementById("c-msg").textContent = msg;
+    if (yrs < 1) { calcState = null; document.getElementById("c-stats").innerHTML = ""; document.getElementById("chartCalc").innerHTML = ""; return; }
+    var im = Math.pow(1 + rate / 100, 1 / 12) - 1, bal = ini, tot = [ini], inv = [ini];
+    for (var t = 1; t <= yrs; t++) {
+      for (var m = 0; m < 12; m++) bal = bal * (1 + im) + pmt;
+      tot.push(bal); inv.push(ini + pmt * 12 * t);
+    }
+    calcState = { tot: tot, inv: inv };
+    var fin = tot[yrs], invested = inv[yrs];
+    document.getElementById("c-stats").innerHTML =
+      '<div class="ci-stat"><div class="ci-stat-label">Valor final</div><div class="ci-stat-value">' + brl(fin) + "</div></div>" +
+      '<div class="ci-stat"><div class="ci-stat-label">Total investido</div><div class="ci-stat-value">' + brl(invested) + "</div></div>" +
+      '<div class="ci-stat"><div class="ci-stat-label">Juros acumulados</div><div class="ci-stat-value pos">' + brl(fin - invested) + "</div></div>";
+    drawCalcChart();
+  }
+  function drawCalcChart() {
+    if (!calcState) return;
+    var c = calcState;
+    lineChart(document.getElementById("chartCalc"), {
+      series: [{ name: "Patrimônio", color: "var(--amber)", values: c.tot },
+               { name: "Investido", color: "var(--blue)", dash: true, values: c.inv }],
+      fill: [0, 1], endLabels: false, xTitle: "Anos",
+      aria: "Gráfico da calculadora: patrimônio acumulado contra total investido ao longo dos anos",
+      tipTitle: function (i) { return i === 0 ? "Início" : "Ano " + i; },
+      rows: function (i) { return [
+        { name: "Patrimônio acumulado", color: "var(--amber)", value: brl(c.tot[i]) },
+        { name: "Total investido", color: "var(--blue)", value: brl(c.inv[i]) },
+        { name: "Juros acumulados", color: null, value: brl(c.tot[i] - c.inv[i]) }]; }
+    });
+  }
+  ["c-ini", "c-pmt", "c-rate", "c-yrs"].forEach(function (id) {
+    document.getElementById(id).addEventListener("input", calc);
+  });
+
+  // ---------- Rosca da carteira modelo ----------
+  var SLICES = [
+    { name: "Renda fixa",    p: 25, v: 25000, c: "var(--c-rf)" },
+    { name: "Ações Brasil",  p: 30, v: 30000, c: "var(--c-br)" },
+    { name: "Internacional", p: 25, v: 25000, c: "var(--c-int)" },
+    { name: "FIIs",          p: 15, v: 15000, c: "var(--c-fii)" },
+    { name: "Cripto",        p: 5,  v: 5000,  c: "var(--c-btc)" }
+  ];
+  function buildDonut() {
+    var svg = document.getElementById("donut"), cx = 120, cy = 120, ro = 108, ri = 68, a = -Math.PI / 2, html = "";
+    function pt(r, ang) { return (cx + r * Math.cos(ang)).toFixed(2) + "," + (cy + r * Math.sin(ang)).toFixed(2); }
+    SLICES.forEach(function (sl, i) {
+      var a1 = a + sl.p / 100 * Math.PI * 2, big = sl.p > 50 ? 1 : 0;
+      var d = "M" + pt(ro, a) + " A" + ro + "," + ro + " 0 " + big + " 1 " + pt(ro, a1) +
+              " L" + pt(ri, a1) + " A" + ri + "," + ri + " 0 " + big + " 0 " + pt(ri, a) + " Z";
+      html += '<path class="ci-slice" data-i="' + i + '" tabindex="0" d="' + d + '" fill="' + sl.c + '" aria-label="' + sl.name + ": " + sl.p + "%, " + brl(sl.v) + '"/>';
+      a = a1;
+    });
+    html += '<text class="ci-dc1" x="120" y="112" text-anchor="middle" pointer-events="none"></text>' +
+            '<text class="ci-dc2" x="120" y="136" text-anchor="middle" pointer-events="none"></text>' +
+            '<text class="ci-dc3" x="120" y="154" text-anchor="middle" pointer-events="none"></text>';
+    svg.innerHTML = html;
+    var t1 = svg.querySelector(".ci-dc1"), t2 = svg.querySelector(".ci-dc2"), t3 = svg.querySelector(".ci-dc3");
+    var rows = document.querySelectorAll("#portTable tr[data-i]"), cur = -1;
+    function set(i) {
+      cur = i;
+      svg.classList.toggle("has-on", i >= 0);
+      svg.querySelectorAll(".ci-slice").forEach(function (el) { el.classList.toggle("on", +el.getAttribute("data-i") === i); });
+      rows.forEach(function (el) { el.classList.toggle("on", +el.getAttribute("data-i") === i); });
+      if (i < 0) { t1.textContent = "Carteira modelo"; t2.textContent = "R$ 100.000"; t3.textContent = "100%"; }
+      else { t1.textContent = SLICES[i].name; t2.textContent = SLICES[i].p + "%"; t3.textContent = brl(SLICES[i].v); }
+    }
+    function bind(el) {
+      var i = +el.getAttribute("data-i"), prev = -1;
+      el.addEventListener("pointerenter", function (ev) { if (ev.pointerType === "mouse") set(i); });
+      el.addEventListener("pointerleave", function (ev) { if (ev.pointerType === "mouse") set(-1); });
+      el.addEventListener("pointerdown", function () { prev = cur; });
+      el.addEventListener("click", function () { set(prev === i && !window.matchMedia("(hover:hover)").matches ? -1 : i); });
+      el.addEventListener("focus", function () { if (el.matches(":focus-visible")) set(i); });
+      el.addEventListener("blur", function () { if (el.matches(".ci-slice")) set(-1); });
+    }
+    svg.querySelectorAll(".ci-slice").forEach(bind);
+    rows.forEach(bind);
+    set(-1);
+  }
+
+  // ---------- Desenho / redimensionamento ----------
+  function drawAll() {
+    drawCompound();
+    drawSim(10, "chartSim10", 2016);
+    drawSim(20, "chartSim20", 2006);
+    drawCalcChart();
+  }
+  var HOSTS = ["chartCompound", "chartSim10", "chartSim20", "chartCalc"];
+  var raf = 0;
+  function onResize() {
+    if (document.getElementById("panel-como-investir").hidden) return;
+    cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(function () {
+      HOSTS.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (Math.floor(el.clientWidth) !== el._lastW) {
+          if (id === "chartCompound") drawCompound();
+          else if (id === "chartSim10") drawSim(10, id, 2016);
+          else if (id === "chartSim20") drawSim(20, id, 2006);
+          else drawCalcChart();
+        }
+      });
+    });
+  }
+  if (window.ResizeObserver) {
+    var ro = new ResizeObserver(onResize);
+    HOSTS.forEach(function (id) { ro.observe(document.getElementById(id)); });
+  }
+  window.addEventListener("resize", onResize);
+
+  buildDonut();
+  calc();
+  route();
 })();
 </script>
 </body>
